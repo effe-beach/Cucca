@@ -15,19 +15,19 @@ void ins_nome(string &C, int u)
 
 void stampa_mazzo(string* M)
 {
+	cout<<"===============MAZZO==============\n";
 	for(int i=0; i<40; i++)
 	{
 		cout<<M[i]<<'\n';
-		if(i==19) cout<<endl;
-		if(i==39) cout<<"\tfine";
 	}
+	cout<<"\n\n";
 }
 
-nodo* append(nodo* L, string* M, int i)
+nodo* append(nodo* L, string a)
 {
-	if(!L) return new nodo(M[i],0);
+	if(!L) return new nodo(a,0);
 	//else
-	L->next= append(L->next,M,i);
+	L->next= append(L->next,a);
 	return L;
 }
 
@@ -40,6 +40,33 @@ void stampa_lista(nodo*L)
 		stampa_lista(L->next);
 	}
 	return;
+}
+
+nodo* scorri_lista(nodo*n, int val)
+{
+	while(val>0)
+	{
+		n=n->next;
+		val--;
+	}
+	return n;
+}
+
+//canc val-esimo nodo
+nodo* canc_nodo(nodo*n, int val)
+{
+	if(val>0) 
+	{
+		n->next= canc_nodo(n->next,val-1);
+		return n;
+	}
+	
+	else //val==0
+	{
+		nodo*p=n->next;
+		delete n;
+		return p; //non e` dangling pointer, xk il nodo successivo a n esiste e non viene deallocato
+	}
 }
 
 void mischia_mazzo(string* M)
@@ -57,25 +84,31 @@ void mischia_mazzo(string* M)
 	//crea lista 40 nodi==mazzo
 	nodo*L=0;
 	for(int i=0; i<40; i++)
-	{
-		L=append(L,M,i);
-	}
-	
-	// stampa_lista(L);
+		L=append(L,M[i]);
+		
+	cout<<"+++++++++++LISTA++++++++++++++\n";
+	stampa_lista(L);
+	cout<<endl;
 	
 	// SHUFFLE:
 	// scegli val da lista, mettilo nel mazzo && toglilo dalla lista, ripeti fino a esaurimento lista	
 	nodo* T=0; // puntatore a nodo temp scelto a caso
-	for(int i=0; i<40; i++)
+	
+	//R: (0<=i<40) && (0<=val<i) && cerca val-esimo elem lista, salva in T, copia nel mazzo, elimina da L.
+	for(int i=0; i<40; i++) 
 	{
 		int val= rand()%(40-i);
-		
+
 		// punto il nodo val-esimo e lo copio in M[i];
-		T= scorri_lista(L,val); //DA FARE
+		// inizializzo T a 0, poi cerco il nodo val-esimo
+							//cout<<"L->carta=="<< L->carta<<endl;
+		T= scorri_lista(L,val); 
 		M[i]= T->carta;
+							//cout<<"T->carta== "	<<T->carta<<endl;
 		//canc nodo
-		canc_nodo(L,val) // DA FARE
-		
+		L= canc_nodo(L,val); //CONTROLLA
+							//cout<<"cancellato nodo "<<val<<"-esimo da L\n\n";
+
 	}
 }
 
@@ -99,11 +132,9 @@ main(){
 	}
 	IN.close();
 	
-	
-	// mischia mazzo
+	stampa_mazzo(M);
 	mischia_mazzo(M);
-	
-	
+	stampa_mazzo(M);
 	
 	
 }	
